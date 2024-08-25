@@ -1,4 +1,5 @@
 # bayesian-inversion-ptychography-generative-priors
 Bayesian inversion for ptychography with deep generative priors.
 
-- MNIST dataset.
+- Train WGAN on MNIST images.
+- Test our method.
