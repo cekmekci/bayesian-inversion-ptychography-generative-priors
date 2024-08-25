@@ -109,8 +109,8 @@ def cartesian_scan_pattern(object_size, probe_shape, step_size = 4, sigma = 0.5)
                        random value.
     """
     scan = []
-    for y in range(0, object_size[0] - probe_shape[2] - 1, step_size):
-        for x in range(0, object_size[1] - probe_shape[3] - 1, step_size):
+    for y in range(0, object_size[0] - probe_shape[0] - 1, step_size):
+        for x in range(0, object_size[1] - probe_shape[1] - 1, step_size):
             y_perturbation = sigma * np.random.randn()
             x_perturbation = sigma * np.random.randn()
             y_new = 1 + y + y_perturbation
@@ -119,9 +119,9 @@ def cartesian_scan_pattern(object_size, probe_shape, step_size = 4, sigma = 0.5)
                 x_new = 1 + x + np.abs(x_perturbation)
             if y_new <= 1:
                 y_new = 1 + y + np.abs(y_perturbation)
-            if x_new >= object_size[1] - probe_shape[3] + 1:
+            if x_new >= object_size[1] - probe_shape[1] + 1:
                 x_new = 1 + x - x_perturbation
-            if y_new >= object_size[0] - probe_shape[2] + 1:
+            if y_new >= object_size[0] - probe_shape[0] + 1:
                 y_new = 1 + y - y_perturbation
             scan.append((y_new, x_new))
     scan = np.array(scan, dtype=np.float32)
@@ -129,19 +129,25 @@ def cartesian_scan_pattern(object_size, probe_shape, step_size = 4, sigma = 0.5)
 
 def create_disk_probe(size = (16, 16), width = 8.0, magnitude = 100.0):
     """
-    Generates a synthetic disk-shaped complex probe for ptychographic imaging.
+    Creates a synthetic complex probe in the shape of a circular disk, which is then
+    converted into a tensor with specific dimensions.
 
-    Args:
-        size (tuple, optional): A tuple (H2, W2) representing the height and width of the probe array.
-                                Default is (16, 16).
-        width (float, optional): The diameter of the disk-shaped probe in pixels. Default is 16.0.
-        magnitude (float, optional): The magnitude of the complex values within the disk-shaped probe.
-                                     Default is 100.0.
+    Parameters:
+    -----------
+    size : tuple of int, optional
+        The size of the grid for the probe, specified as (height, width).
+        Default is (16, 16).
+    width : float, optional
+        The diameter of the circular disk in the probe. Default is 8.0.
+    magnitude : float, optional
+        The magnitude of the complex values in the probe. Default is 100.0.
 
     Returns:
-        numpy.ndarray: A 2D numpy array of shape `size` representing the complex-valued disk-shaped probe.
-                       The values inside the disk have a magnitude specified by the `magnitude` parameter
-                       and a phase shift of π/2. The values outside the disk are zero.
+    --------
+    torch.Tensor
+        A tensor of shape (1, 2, H2, W2), where H2 and W2 correspond to the height and
+        width specified in the `size` parameter. The tensor contains the real and
+        imaginary components of the complex probe, stacked along the second dimension.
     """
     # Construct a grid
     x = np.linspace(-size[1]//2, size[1]//2, size[1])
@@ -152,7 +158,11 @@ def create_disk_probe(size = (16, 16), width = 8.0, magnitude = 100.0):
     flat_top_region = r_squared <= (width/2)**2
     # Generate the synthetic probe
     complex_probe = magnitude * flat_top_region * np.exp(1j * np.pi / 2 * flat_top_region)
-    return complex_probe
+    # Convert the probe into a tensor shaped (1,2,H2,W2)
+    probe = np.expand_dims(complex_probe, 0)
+    probe = np.stack((np.real(probe), np.imag(probe)), 1)
+    probe = torch.from_numpy(probe).float()
+    return probe
 
 def l2_error(true_object, reconstructed_object):
     """
@@ -181,14 +191,134 @@ def l2_error(true_object, reconstructed_object):
     return l2_error
 
 
+def free_space_tensor(image_shape = (64, 64)):
+    """
+    Creates a tensor representing free space with two channels: one filled with ones
+    and the other with zeros.
+
+    Parameters:
+    -----------
+    image_shape : tuple of int, optional
+        The shape of the image, specified as (height, width). Default is (64, 64).
+
+    Returns:
+    --------
+    torch.Tensor
+        A tensor of shape (1, 2, H, W), where H and W correspond to the height and
+        width specified in the `image_shape` parameter. The first channel is filled
+        with ones, representing the real component, and the second channel is filled
+        with zeros, representing the imaginary component.
+    """
+    # Create a tensor of ones with shape (1, 1, 64, 64)
+    ones_channel = torch.ones(1, 1, *image_shape)
+    # Create a tensor of zeros with shape (1, 1, 64, 64)
+    zeros_channel = torch.zeros(1, 1, *image_shape)
+    # Concatenate the two channels along the second dimension to get a tensor of shape (1, 2, 64, 64)
+    tensor = torch.cat((ones_channel, zeros_channel), dim=1)
+    return tensor
+
+
+def calculate_overlap(probe, shift):
+    """
+    Calculates the overlap rate between a complex probe's binary mask and its shifted version.
+
+    Parameters:
+    -----------
+    probe : torch.Tensor
+        A tensor of shape (1, 2, H2, W2) representing the complex probe, where the first channel
+        is the real part and the second channel is the imaginary part.
+    shift : int
+        The amount by which to shift the mask along the width (horizontal axis). The shift should
+        not exceed the width of the mask.
+
+    Returns:
+    --------
+    float
+        The overlap rate, defined as the ratio of the overlapping area between the original
+        binary mask and its shifted version to the total area of the mask.
+    """
+    # probe is (1,2,H2,W2)
+    complex_probe = (probe[0,0,:,:] + 1j * probe[0,1,:,:]).detach().cpu().numpy()
+    # shift should not exceed the size of the mask
+    # Convert the mask to a binary array, considering non-zero values as 1
+    binary_mask = (complex_probe != 0).astype(int)
+    # Get the dimensions of the mask
+    mask_height, mask_width = binary_mask.shape
+    # Zero pad the binary mask
+    binary_mask = np.concatenate((binary_mask, np.zeros_like(binary_mask)), 1)
+    # Create a shifted version of the mask
+    shifted_mask = np.roll(binary_mask, shift = shift, axis = 1)
+    # Calculate the overlap by counting the number of overlapping elements
+    overlap_area = np.sum(binary_mask & shifted_mask)
+    # Calculate the total area of the mask
+    mask_area = np.sum(binary_mask)
+    # Calculate the overlap rate
+    overlap_rate = overlap_area / mask_area
+    return overlap_rate
+
+
+def rPIE(measurement, object_size, scan, probe, num_iter):
+    """
+    Performs the rPIE algorithm to reconstruct an object from measured diffraction patterns.
+
+    Parameters:
+    -----------
+    measurement : torch.Tensor
+        A tensor of shape (1, S, 1, H2, W2) representing the measured diffraction patterns, where S is
+        the number of scan positions, and H2, W2 are the height and width of the probe.
+    object_size : tuple of int
+        A tuple (H1, W1) representing the size of the object to be reconstructed.
+    scan : numpy.ndarray
+        A numpy array of shape (S, 2) containing the scan positions in the object space.
+    probe : torch.Tensor
+        A tensor of shape (1, 2, H2, W2) representing the complex probe, where the first channel is
+        the real part and the second channel is the imaginary part.
+    num_iter : int
+        The number of iterations to perform during the reconstruction.
+
+    Returns:
+    --------
+    torch.Tensor
+        A tensor of shape (1, 2, H2, W2) representing the reconstructed object, with the first channel
+        being the real part and the second channel being the imaginary part.
+    """
+    device = measurement.device
+    # convert probe into a complex array (1,1,1,H2,W2)
+    probe = np.squeeze(probe.detach().cpu().numpy(), 0)
+    probe = probe[0,:,:] + 1j * probe[1,:,:]
+    probe = np.expand_dims(probe, (0,1,2)) # expand probe dims to make it compatible with tike (1,1,1,H2,W2)
+    # convert measurement into a complex array (S,H2,W2)
+    measurement = np.squeeze(measurement.detach().cpu().numpy(), 0)
+    measurement = measurement[:,0,:,:]
+    # initial estimate of the object
+    psi = np.ones(object_size) + 1j * 0.0
+    # RPIE
+    parameters = tike.ptycho.PtychoParameters(
+        # Provide initial guesses for parameters that are updated
+        probe = probe,
+        scan = scan,
+        psi = psi,
+        # Probe options
+        probe_options = None,
+        object_options = tike.ptycho.ObjectOptions(),
+        position_options = None, # indicates that positions will not be updated
+        algorithm_options = tike.ptycho.RpieOptions(num_iter = num_iter, num_batch = 1))
+    result = tike.ptycho.reconstruct(
+        data = measurement,
+        parameters = parameters)
+    # convert the result into a tensor with shape (1,2,H2,W2)
+    result = result.psi
+    result = np.expand_dims(result, 0)
+    result = np.stack((np.real(result), np.imag(result)), 1)
+    result = torch.from_numpy(result).float().to(device)
+    return result
+
+
 # Perform the adjoint test here.
 if __name__ == '__main__':
 
     object_size = (512, 512)
     probe_size = (1, 2, 128, 128)
-
-    probe = torch.randn(*probe_size)
-    scan = cartesian_scan_pattern(object_size, probe_size, step_size = 32, sigma = 1)
 
     x = torch.randn(1, 2, *object_size)
     y_tilde = ptycho_forward_op(x, scan, probe)
