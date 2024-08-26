@@ -1,7 +1,7 @@
-import tike
+# import tike
 import torch
 import numpy as np
-import tike.ptycho
+# import tike.ptycho
 
 
 def ptycho_forward_op(input, scan, probe):
@@ -182,8 +182,8 @@ def l2_error(true_object, reconstructed_object):
         float: The L2 error, which is a non-negative real number representing the Euclidean distance between
                the true object and the reconstructed object.
     """
-    # true object is (1,2,H1,W1)
-    # reconstructed_object object is (1,2,H1,W1)
+    true_object = true_object[0,0,:,:] + 1j * true_object[0,1,:,:]
+    reconstructed_object = reconstructed_object[0,0,:,:] + 1j * reconstructed_object[0,1,:,:]
     term1 = np.vdot(reconstructed_object, reconstructed_object)
     term2 = np.vdot(true_object, true_object)
     term3 = - 2 * np.abs(np.vdot(reconstructed_object, true_object))

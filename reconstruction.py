@@ -11,7 +11,7 @@ from samplers import optimize_latent_variable, ULA_Poisson_Sampler
 
 
 # Fix the random seed
-SEED = 123
+SEED = 1
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 np.random.seed(SEED)
@@ -35,9 +35,9 @@ probe_amplitude = 100
 probe_shape = (16, 16)
 probe_width = 8
 # latent variable initialization
-z_lr = 1e-4
+z_lr = 1e-3
 z_num_iter = 1000
-z_verbose = True
+z_verbose = False
 # sampler settings
 sampler_num_iter = 1000
 sampler_burn_in = 500
@@ -46,7 +46,6 @@ sampler_step_size = 1e-5
 output_dir = "./results/"
 # rPIE settings
 rpie_num_iter = 1000
-
 
 # Get the test dataloader
 test_dataloader = get_mnist_test_dataloader(dataset_path, batch_size = 1, image_size = image_size, offset = offset)
@@ -73,7 +72,7 @@ if not os.path.exists(results_path):
 
 # Test the proposed method on complex test objects
 for i , (gt_object, _) in enumerate(test_dataloader):
-
+    print("Test example", i)
     # Obtain the intensity patterns
     farplane = A(gt_object) # (1,S,2,H2,W2)
     intensity = torch.sum(farplane**2, 2, keepdim = True) # (1,S,1,H2,W2)
@@ -111,4 +110,16 @@ for i , (gt_object, _) in enumerate(test_dataloader):
     with open(results_path + str(i) + "_rpie_results.pkl", "wb") as fp:
         pickle.dump(rpie_result, fp)
 
-    break
+    # Save the true object
+    with open(results_path + str(i) + "_true_object.pkl", "wb") as fp:
+        pickle.dump(gt_object, fp)
+
+    # Only do this for 100 test examples
+    if i == 99:
+        break
+
+# Save the probe and the scan pattern
+with open(results_path + "probe.pkl", "wb") as fp:
+    pickle.dump(probe, fp)
+with open(results_path + "scan.pkl", "wb") as fp:
+    pickle.dump(scan, fp)
