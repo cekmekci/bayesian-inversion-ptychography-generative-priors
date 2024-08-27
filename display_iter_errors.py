@@ -7,7 +7,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from utils.utils_ptycho import l2_error
 
 # Specify the overlap ratio and probe amplitude values
-overlap_ratio = 0.36363636363636365
+overlap_ratio = 0.045454545454545456
 probe_amplitude = 100
 
 # Specify the number of pixels to crop before calculating the metrics. Make sure
@@ -18,7 +18,7 @@ num_pix_crop = 8
 result_path = "./results/overlap_ratio_" + str(overlap_ratio) + "_probe_amplitude_" + str(probe_amplitude) + "/"
 
 # Index of the test example
-test_sample_idx = "0"
+test_sample_idx = "8"
 
 # Obtain the samples of the proposed method and their mean
 ula_poisson_results_path = result_path + test_sample_idx + "_ula_poisson_results.pkl"

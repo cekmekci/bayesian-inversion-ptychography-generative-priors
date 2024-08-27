@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 # Specify the overlap ratio and probe amplitude values
-overlap_ratio = 0.36363636363636365
+overlap_ratio = 0.045454545454545456
 probe_amplitude = 100
 
 # Path of the folder containing the pickle files
 result_path = "./results/overlap_ratio_" + str(overlap_ratio) + "_probe_amplitude_" + str(probe_amplitude) + "/"
 
 # Index of the test example
-test_sample_idx = "0"
+test_sample_idx = "8"
 
 # Calculate the summary images for our method
 ula_poisson_results_path = result_path + test_sample_idx + "_ula_poisson_results.pkl"

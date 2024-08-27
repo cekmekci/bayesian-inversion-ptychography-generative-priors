@@ -27,7 +27,7 @@ generator_hidden_dim = 64
 discriminator_hidden_dim = 64
 lr = 1e-4
 betas = (0.5, 0.999)
-num_epochs = 250
+num_epochs = 100
 
 # Obtain the training dataloader
 train_dataloader = get_mnist_training_dataloader(dataset_path = dataset_path, batch_size = batch_size, image_size = image_size, offset = offset)

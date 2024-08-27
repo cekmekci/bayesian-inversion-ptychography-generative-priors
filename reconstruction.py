@@ -26,16 +26,16 @@ offset = 0.2
 # model settings
 latent_dim = 100
 generator_hidden_dim = 64
-model_path = "./models/gen_mnist_model.pt" # to-do
+model_path = "./models/gen_mnist_model.pt"
 # scan settings
-step_size_scan = 4
-perturbation_std_scan = 0.5
+step_size_scan = 5
+perturbation_std_scan = 0.01
 # probe settings
 probe_amplitude = 100
 probe_shape = (16, 16)
 probe_width = 8
 # latent variable initialization
-z_lr = 1e-3
+z_lr = 1e-4
 z_num_iter = 1000
 z_verbose = False
 # sampler settings
