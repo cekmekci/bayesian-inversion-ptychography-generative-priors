@@ -1,7 +1,7 @@
-# import tike
+import tike
 import torch
 import numpy as np
-# import tike.ptycho
+import tike.ptycho
 
 
 def ptycho_forward_op(input, scan, probe):

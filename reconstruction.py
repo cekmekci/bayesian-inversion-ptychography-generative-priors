@@ -28,10 +28,10 @@ latent_dim = 100
 generator_hidden_dim = 64
 model_path = "./models/gen_mnist_model.pt"
 # scan settings
-step_size_scan = 5
+step_size_scan = 7
 perturbation_std_scan = 0.01
 # probe settings
-probe_amplitude = 100
+probe_amplitude = 10
 probe_shape = (16, 16)
 probe_width = 8
 # latent variable initialization
