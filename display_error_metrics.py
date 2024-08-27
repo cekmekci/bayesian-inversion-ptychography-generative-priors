@@ -6,8 +6,8 @@ import pandas as pd
 from utils.utils_ptycho import l2_error
 
 # Specify the overlap ratios and probe amplitudes we used in our experiments
-overlap_ratios = [0.045454545454545456]
-probe_amplitudes = [100]
+overlap_ratios = [0.045454545454545456, 0.09090909090909091, 0.22727272727272727]
+probe_amplitudes = [10, 100]
 
 # Specify the number of pixels to crop before calculating the metrics. Make sure
 # that it is equal to the half of the width of the probe.

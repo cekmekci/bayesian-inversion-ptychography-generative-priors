@@ -13,7 +13,7 @@ probe_amplitude = 100
 result_path = "./results/overlap_ratio_" + str(overlap_ratio) + "_probe_amplitude_" + str(probe_amplitude) + "/"
 
 # Index of the test example
-test_sample_idx = "8"
+test_sample_idx = "10"
 
 # Calculate the summary images for our method
 ula_poisson_results_path = result_path + test_sample_idx + "_ula_poisson_results.pkl"

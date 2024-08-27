@@ -2,13 +2,14 @@ import numpy as np
 import os
 import pickle
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from utils.utils_ptycho import l2_error
 from scipy.stats import pearsonr, spearmanr
 
 
 # Specify the overlap ratio and probe amplitude values
-overlap_ratio = 0.045454545454545456
+overlap_ratio = 0.22727272727272727
 probe_amplitude = 100
 
 # Specify the number of pixels to crop before calculating the metrics. Make sure
@@ -19,7 +20,7 @@ num_pix_crop = 8
 result_path = "./results/overlap_ratio_" + str(overlap_ratio) + "_probe_amplitude_" + str(probe_amplitude) + "/"
 
 # Index of the test example
-test_sample_idx = "0"
+test_sample_idx = "7"
 
 # Obtain the reconstructed image (mean) and the uncertainty (std) provided by our method
 ula_poisson_results_path = result_path + test_sample_idx + "_ula_poisson_results.pkl"
@@ -47,6 +48,24 @@ theta_opt = -1 * np.angle(np.vdot(ula_mean, gt_object))
 ula_mean_corrected = ula_mean * np.exp(1j * theta_opt)
 error_map = np.abs(ula_mean_corrected - gt_object)
 
+# Save the error and uncertainty maps
+fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize = (15, 6))
+im = axes[0].imshow(ula_std, cmap = 'jet')
+axes[0].set_title("Uncertainty",  fontsize = 12)
+axes[0].axis('off')  # Hide axes ticks
+divider = make_axes_locatable(axes[0])
+cax = divider.append_axes('right', size='5%', pad=0.05)
+fig.colorbar(im, cax = cax, orientation='vertical')
+im = axes[1].imshow(error_map, cmap = 'jet')
+axes[1].set_title("Error",  fontsize = 12)
+axes[1].axis('off')  # Hide axes ticks
+divider = make_axes_locatable(axes[1])
+cax = divider.append_axes('right', size='5%', pad=0.05)
+fig.colorbar(im, cax = cax, orientation='vertical')
+plt.tight_layout()
+plt.savefig("uncertainty_error_correlation.pdf", format='pdf', bbox_inches = 'tight', pad_inches = 0)
+plt.close()
+
 # Flatten the maps to 1D arrays for correlation computation
 error_values = error_map.flatten()
 uncertainty_values = ula_std.flatten()
@@ -56,6 +75,8 @@ pearson_corr, pearson_p_value = pearsonr(uncertainty_values, error_values)
 spearman_corr, spearman_p_value = spearmanr(uncertainty_values, error_values)
 
 print("Pearson Correlation:", pearson_corr, "Pearson P Value:", pearson_p_value, "Spearman Correlation:", spearman_corr, "Spearman P Value:", spearman_p_value)
+with open("uncertainty_error_correlation.txt", "w") as file:
+    file.write("Pearson Correlation: " + str(pearson_corr) + " Pearson P Value: " + str(pearson_p_value) + " Spearman Correlation: " + str(spearman_corr) + " Spearman P Value: " + str(spearman_p_value) + "\n")
 
 # Scatter plot of uncertainty vs. error
 plt.figure(figsize=(6, 6))
