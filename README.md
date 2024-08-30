@@ -5,18 +5,24 @@ This repository contains the official implementation of the paper **"xxxx"** by 
 
 ## Overview
 
-xxxx
+Include the abstract of the paper here.
 
-## Features
+## Key Features:
 
-- **Implementation of ULA+GM:** The core implementation of the unadjusted Langevin algorithm (ULA) as described in the paper.
-- **Numerical Experiments:** Scripts to reproduce the experiments from the paper, including comparisons with rPIE.
+- **Bayesian Framework:** Incorporates a Bayesian approach to inversion, allowing for principled uncertainty quantification in the reconstructed images.
+- **Generative Priors:** Utilizes generative models as priors, improving the reconstruction quality by leveraging learned representations of image data.
+- **Modular Design:** The code is designed to be modular, making it easy to adapt and extend for different generative models or imaging settings.
+- **GPU Support:** The implementation is optimized for GPU acceleration using PyTorch, enabling efficient computation even for large-scale problems.
+- **Reproducibility:** Scripts to reproduce the experiments from the paper, including comparisons with rPIE.
 
 ## Repository Structure
 
 - `./models/` - Includes a pre-trained Wasserstein GAN model for generating ptychographic objects of interest.
 - `./utils/` - Contains some utility functions for data-loading, ptychography, and training.
-- xxx
+- `models.py` -  Contains the implementation of the Wasserstein GAN architecture used for the experiments.
+- `samplers.py` -  Contains the implementation of the unadjusted Langevin algorithm proposed in the paper.
+- `train.py` - Trains the Wasserstein GAN on the MNIST dataset.
+- `reconstruction.py` - Runs the proposed method and the rPIE on test data and saves the results.
 
 
 ## Installation
