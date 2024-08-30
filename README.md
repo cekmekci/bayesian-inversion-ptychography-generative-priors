@@ -81,10 +81,6 @@ python display_iter_errors.py
 ```
 
 ```bash
-python display_error_metrics.py
-```
-
-```bash
 python display_uncertainty_error_correlation.py
 ```
 
