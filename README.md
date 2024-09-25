@@ -1,11 +1,11 @@
 
 # Bayesian Inversion for Ptychography with Deep Generative Priors
 
-This repository contains the official implementation of the paper **"xxxx"** by xxxx.
+This repository contains the official implementation of the paper **"Integrating Generative and Physics-Based Models for Ptychographic Imaging with Uncertainty Quantification"** by Canberk Ekmekci, Tekin Bicer, Zichao Wendy Di, Junjing Deng, and Mujdat Cetin.
 
 ## Overview
 
-Include the abstract of the paper here.
+Ptychography is a scanning coherent diffractive imaging technique that enables imaging nanometer-scale features in extended samples. One main challenge is that widely used iterative image reconstruction methods often require significant amount of overlap between adjacent scan locations, leading to large data volumes and prolonged acquisition times. To address this key limitation, this paper proposes a Bayesian inversion method for ptychography that performs effectively even with less overlap between neighboring scan locations. Furthermore, the proposed method can quantify the inherent uncertainty on the ptychographic object, which is created by the ill-posed nature of the ptychographic inverse problem. At a high level, the proposed method first utilizes a deep generative model to learn the prior distribution of the object and then generates samples from the posterior distribution of the object by using a Markov Chain Monte Carlo algorithm. Our results from simulated ptychography experiments show that the proposed framework can consistently outperform a widely used iterative reconstruction algorithm in cases of reduced overlap. Moreover, the proposed framework can provide uncertainty estimates that closely correlate with the true error, which is not available in practice.
 
 ## Key Features:
 
@@ -28,7 +28,7 @@ Include the abstract of the paper here.
 - `display_error_metrics.py` - Calculates the error for different conditions of the problem.
 - `display_iter_errors.py` - Displays the error as a function of iterations for the proposed method.
 - `display_uncertainty_error_correlation.py` - Demonstrates the correlation between the error and the uncertainty estimates.
-- `display_uncertainty_maps.py` - Provides some example uncertainty maps.
+- `display_uncertainty_maps.py` - Provides example uncertainty maps.
 - `display_visual_result.py` - Shows visuals demonstrating the reconstruction performance.
 
 ## Installation
@@ -40,10 +40,15 @@ Include the abstract of the paper here.
    cd bayesian-inversion-ptychography-generative-priors
    ```
 
-2. **Install the required dependencies:**
+2. **Installation of Tike Library:**
 
    ```bash
-   pip install -r requirements.txt
+   wget https://github.com/AdvancedPhotonSource/tike/archive/refs/tags/v0.25.1.zip
+   unzip -qq v0.25.1.zip
+   cd tike-0.25.1/
+   pip -qq install . --no-deps
+   pip -qq install mpi4py
+   cd ../
    ```
 
 ## Usage
@@ -97,14 +102,11 @@ python display_visual_result.py
 If you find this repository useful in your research, please consider citing:
 
 ```
-@article{
+@inproceedings{Ekmekci2024PtychographyUncertaintyQuantification,
+  author    = {Canberk Ekmekci and Tekin Bicer and Zichao (Wendy) Di and Junjing Deng and Mujdat Cetin},
+  title     = {Integrating Generative and Physics-Based Models for Ptychographic Imaging with Uncertainty Quantification},
+  booktitle = {Machine Learning and the Physical Sciences Workshop at the Neural Information Processing Systems},
+  year      = {2024},
+  url       = {URL on OpenReview},
 }
 ```
-
-## License
-
-xxxx
-
-## Acknowledgements
-
-xxxx
