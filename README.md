@@ -1,7 +1,8 @@
 
 # Bayesian Inversion for Ptychography with Deep Generative Priors
 
-This repository contains the official implementation of the paper **"Integrating Generative and Physics-Based Models for Ptychographic Imaging with Uncertainty Quantification"** by Canberk Ekmekci, Tekin Bicer, Zichao Wendy Di, Junjing Deng, and Mujdat Cetin.
+This repository contains the official implementation of the paper **"Integrating Generative and Physics-Based Models for Ptychographic Imaging with Uncertainty Quantification"** by [Canberk Ekmekci](https://cekmekci.github.io/), [Tekin Bicer](https://www.anl.gov/profile/tekin-bicer), [Zichao (Wendy) Di](https://www.anl.gov/profile/zichao-di), [Junjing Deng](https://www.anl.gov/profile/junjing-deng), and [Mujdat Cetin](https://www.hajim.rochester.edu/ece/people/faculty/cetin_mujdat/).
+
 
 ## Overview
 
